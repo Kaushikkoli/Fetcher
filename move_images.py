@@ -1,24 +1,27 @@
-import sys, os, glob, shutil
+import os
+from PIL import Image
 
 #move images to folder:images
 def move():
     script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-    rel_path = "fetcher_main\\images"
-    abs_file_path = os.path.join(script_dir , rel_path)
+    abs_file_path = os.path.join(script_dir, "images")
 
     if (os.path.exists(abs_file_path) == False):
         os.mkdir(abs_file_path)
 
-    in_dir = script_dir
-    out_dir = abs_file_path
-    new_dirs = os.listdir(in_dir)
-    old_dirs = os.listdir(out_dir)
+    files = os.listdir(script_dir)
 
-    #See if directory already exists. If it doesnt exists, move entire directory. If it does exists, move only new images.
-    for dir in new_dirs:
-        if ((dir not in old_dirs) and (dir.endswith(".jpg"))):
-            shutil.move(dir, out_dir)
-        else:
-            new_images = glob.glob(in_dir + dir + '*.jpg')
-            for i in new_images:
-                shutil.move(i, os.path.join(out_dir, dir, os.path.basename(i)))
+    for file in files:
+        print(file)
+        try:
+            typ = file.split(".")[1]
+            if ((typ == "jpg") or (typ == "png")):
+                img = Image.open(os.path.join(script_dir, file))
+                img.save(os.path.join(abs_file_path, file))
+                os.remove(os.path.join(script_dir, file))
+        except Exception as e:
+            print(e)
+
+
+
+move()

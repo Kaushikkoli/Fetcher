@@ -12,7 +12,7 @@ exit = 0
 
 def retrieve():
     #Connect to test.db
-    conn = sqlite3.connect('test.db')
+    conn = sqlite3.connect('data.db')
     print("Opened database successfully")
     cursor = conn.cursor()
 
@@ -43,22 +43,23 @@ def retrieve():
 
         print(submission)
         cursor.execute("SELECT ID FROM DETAILS WHERE ID = ?", (submission.id,))
-        data=cursor.fetchall()
+        data = cursor.fetchall()
 
         if len(data) != 0:
             continue
         elif ((submission.url.endswith(".png")) or (submission.url.endswith(".jpg"))):
         #Insert details in DB
             cursor.execute("INSERT INTO DETAILS (ID, TITLE, URL, CREATED) VALUES (?, ?, ?, ?)",
-              (submission.id, submission.title, submission.url, submission.created));
+              (submission.id, submission.title, submission.url, submission.created))
             print("ADDED VALUES")
 
         #Select only .png and .jpg files to download
-            if ((submission.url.endswith(".png")) or (submission.url.endswith(".jpg"))):
+            if submission.url.endswith(".png"):
+                name = submission.id + ".png"
+            elif submission.url.endswith(".jpg"):
                 name = submission.id + ".jpg"
             else:
                 continue
-
         #Download images
             urllib.request.urlretrieve(submission.url, name)
 
@@ -78,6 +79,7 @@ def loop():
         if keyboard.is_pressed('q'):  # if key 'q' is pressed 
             exit = 1
         retrieve()
-        time.sleep(15) #seconds
+        time.sleep(45) #seconds
 
-loop()
+
+retrieve()
