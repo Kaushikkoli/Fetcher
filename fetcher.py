@@ -6,9 +6,9 @@ import urllib.request
 import sqlite3
 import time
 import keyboard
+import move_images
 
-if keyboard.is_pressed('q'):  # if key 'q' is pressed 
-    exit = 1
+exit = 0
 
 def retrieve():
     #Connect to test.db
@@ -17,11 +17,15 @@ def retrieve():
     cursor = conn.cursor()
 
     #Create Table DETAILS
-    """conn.execute('''CREATE TABLE DETAILS
+    conn.execute('''CREATE TABLE IF NOT EXISTS DETAILS 
              (ID INT PRIMARY KEY     NOT NULL,
              TITLE           TEXT    NOT NULL,
              URL             TEXT    NOT NULL,
-             CREATED         INT     NOT NULL); ''')"""
+             CREATED         INT     NOT NULL); ''')
+
+    #Checking if the user pressed 'q'
+    if keyboard.is_pressed('q'):  # if key 'q' is pressed 
+            exit = 1
 
     #Initialize RedditBot
     reddit = praw.Reddit(client_id='aVFs_elcBcouwg',
@@ -42,7 +46,7 @@ def retrieve():
         data=cursor.fetchall()
 
         if len(data) != 0:
-            break
+            continue
         elif ((submission.url.endswith(".png")) or (submission.url.endswith(".jpg"))):
         #Insert details in DB
             cursor.execute("INSERT INTO DETAILS (ID, TITLE, URL, CREATED) VALUES (?, ?, ?, ?)",
@@ -61,7 +65,7 @@ def retrieve():
     conn.commit()
     conn.close()
 
-    os.system("MoveImages.py 1")
+    move_images.move()
 
     #To make to code loop after specific interval
     """while True:
@@ -69,10 +73,11 @@ def retrieve():
         time.sleep(Amount of time in seconds)"""
 
 def loop():
+    global exit
     while exit != 1:
+        if keyboard.is_pressed('q'):  # if key 'q' is pressed 
+            exit = 1
         retrieve()
         time.sleep(15) #seconds
 
-if __name__ == '__main__':
-    retrieve()
-    
+loop()
